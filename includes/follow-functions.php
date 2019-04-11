@@ -187,7 +187,19 @@ function pwuf_unfollow_user( $user_id, $unfollow_user ) {
  */
 
 function pwuf_get_following_count( $user_id ) {
+  if ( empty( $user_id ) ) {
+      $user_id = get_current_user_id();
+    }
 
+    $following = pwuf_get_following( $user_id );
+
+    $count = 0;
+
+    if ( $following ) {
+      $count = count( $following );
+    }
+
+    return (int) apply_filters( 'pwuf_get_following_count', $count, $user_id );
 }
 
 
@@ -203,7 +215,19 @@ function pwuf_get_following_count( $user_id ) {
  */
 
 function pwuf_get_follower_count( $user_id ) {
+  if ( empty( $user_id ) ) {
+      $user_id = get_current_user_id();
+    }
 
+    $followed_count = get_user_meta( $user_id, '_pwuf_followed_by_count', true );
+
+    $count = 0;
+
+    if ( $followed_count ) {
+      $count = $followed_count;
+    }
+
+    return (int) apply_filters( 'pwuf_get_follower_count', $count, $user_id );
 }
 
 
@@ -220,7 +244,23 @@ function pwuf_get_follower_count( $user_id ) {
  */
 
 function pwuf_increase_followed_by_count( $user_id ) {
+  do_action( 'pwuf_pre_increase_followed_count', $user_id );
 
+    $followed_count = pwuf_get_follower_count( $user_id );
+    
+    if ( $followed_count !== false ) {
+      
+      $new_followed_count = update_user_meta( $user_id, '_pwuf_followed_by_count', $followed_count + 1 );
+    
+    } else {
+    
+      $new_followed_count = update_user_meta( $user_id, '_pwuf_followed_by_count', 1 );
+    
+    }
+
+    do_action( 'pwuf_post_increase_followed_count', $user_id );
+
+    return $new_followed_count;
 }
 
 
@@ -236,7 +276,19 @@ function pwuf_increase_followed_by_count( $user_id ) {
  */
 
 function pwuf_decrease_followed_by_count( $user_id ) {
+  
+  do_action( 'pwuf_pre_decrease_followed_count', $user_id );
 
+  $followed_count = pwuf_get_follower_count( $user_id );
+
+  if ( $followed_count ) {
+
+    $count = update_user_meta( $user_id, '_pwuf_followed_by_count', ( $followed_count - 1 ) );
+
+    do_action( 'pwuf_post_increase_followed_count', $user_id );
+
+  }
+  return $count;
 }
 
 
@@ -253,5 +305,13 @@ function pwuf_decrease_followed_by_count( $user_id ) {
  */
 
 function pwuf_is_following( $user_id, $followed_user ) {
+  $following = pwuf_get_following( $user_id );
+    
+    $ret = false; // is not following by default
 
+    if ( is_array( $following ) && in_array( $followed_user, $following ) ) {
+      $ret = true; // is following
+    }
+
+    return (bool) apply_filters( 'pwuf_is_following', $user_id, $followed_user );
 }
