@@ -50,3 +50,51 @@ $jq(document).ready(function() {
  
 }
  
+
+$jq(".follow").live("click",function() {
+ 
+        var activeObject = $jq(this);
+ 
+        var email = $jq("#user_email").val();
+        if (emailValidation(email)) {
+ 
+            jQuery.ajax({
+                type: "post",
+                url: ajaxData.ajaxUrl,
+                data: "action=follow_wp_authors&author_id="+$jq(this).attr("data-author")+"&nonce="+ajaxData.ajaxNonce+"&url="+ajaxData.currentURL+"&email="+email,
+                success: function(message) {
+                    var result = eval('(' + message + ')');
+                    if (result.status == 'success' ) {
+                        activeObject.val("Following");
+                        activeObject.removeClass("follow").addClass("following");
+                    }
+                }
+            });
+        }
+ 
+    });
+
+
+$jq("#loadFollowers").live("click",function() {
+        var email = $jq("#user_email").val();
+        if (emailValidation(email)) {
+ 
+            jQuery.ajax({
+                type: "post",
+                url: ajaxData.ajaxUrl,
+                data: "action=load_subscribed_authors&nonce="+ajaxData.ajaxNonce+"&email="+email,
+                success: function(message) {
+                    var result = eval('(' + message + ')');
+                    $jq(".follow").each(function() {
+                        var actObj = $jq(this);
+ 
+                        var searchedIndex = ($jq.inArray($jq(this).attr("data-author"), result.authors));
+                        if (searchedIndex != -1) {
+                            actObj.val("Following");
+                            actObj.removeClass("follow").addClass("following");
+                        }
+                    });
+                }
+            });
+        }
+    });
