@@ -69,7 +69,43 @@ function pwuf_get_followers( $user_id = 0 ) {
  */
 
 function pwuf_follow_user( $user_id, $user_to_follow ) {
+  $following = pwuf_get_following( $user_id );
+    
+    if ( $following && is_array( $following ) ) {
+      $following[] = $user_to_follow;
+    } else {
+      $following = array();
+      $following[] = $user_to_follow;
+    }
 
+    // retrieve the IDs of all users who are following $user_to_follow
+    $followers = pwuf_get_followers( $user_to_follow );
+    
+    if ( $followers && is_array( $followers ) ) {
+      $followers[] = $user_id;
+    } else {
+      $followers = array();
+      $followers[] = $user_id;
+    }
+
+    do_action( 'pwuf_pre_follow_user', $user_id, $user_to_follow );
+
+    // update the IDs that this user is following
+    $followed = update_user_meta( $user_id, '_pwuf_following', $following );
+
+    // update the IDs that follow $user_id
+    $followers = update_user_meta( $user_to_follow, '_pwuf_followers', $followers );
+
+    // increase the followers count
+    $followed_count = pwuf_increase_followed_by_count( $user_to_follow ) ;
+
+    if ( $followed ) {
+      
+      do_action( 'pwuf_post_follow_user', $user_id, $user_to_follow );
+
+      return true;
+    }
+    return false;
 }
 
 
@@ -86,7 +122,56 @@ function pwuf_follow_user( $user_id, $user_to_follow ) {
  */
 
 function pwuf_unfollow_user( $user_id, $unfollow_user ) {
+  do_action( 'pwuf_pre_unfollow_user', $user_id, $unfollow_user );
 
+    // get all IDs that $user_id follows
+    $following = pwuf_get_following( $user_id );
+
+    if ( is_array( $following ) && in_array( $unfollow_user, $following ) ) {
+
+      $modified = false;
+      
+      foreach ( $following as $key => $follow ) {
+        if ( $follow == $unfollow_user ) {
+          unset( $following[$key] );
+          $modified = true;
+        }
+      }
+
+      if ( $modified ) {
+        if ( update_user_meta( $user_id, '_pwuf_following', $following ) ) {
+          pwuf_decrease_followed_by_count( $unfollow_user );
+        }
+      }
+
+    }
+
+    // get all IDs that follow the user we have just unfollowed so that we can remove $user_id
+    $followers = pwuf_get_followers( $unfollow_user );
+    
+    if ( is_array( $followers ) && in_array( $user_id, $followers ) ) {
+      
+      $modified = false;
+      
+      foreach ( $followers as $key => $follower ) {
+        if ( $follower == $user_id ) {
+          unset( $followers[$key] );
+          $modified = true;
+        }
+      }
+
+      if ( $modified ) {
+        update_user_meta( $unfollow_user, '_pwuf_followers', $followers );
+      }
+
+    }
+
+    if ( $modified ) {
+      do_action( 'pwuf_post_unfollow_user', $user_id, $unfollow_user );
+      return true;
+    }
+
+    return false;
 }
 
 
