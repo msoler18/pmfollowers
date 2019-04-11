@@ -24,7 +24,13 @@
  */
 
 function pwuf_get_following( $user_id = 0 ) {
+  if ( empty( $user_id ) ) {
+      $user_id = get_current_user_id();
+    }
 
+    $following = get_user_meta( $user_id, '_pwuf_following', true );
+
+    return (array) apply_filters( 'pwuf_get_following', $following, $user_id );
 }
 
 
@@ -40,7 +46,13 @@ function pwuf_get_following( $user_id = 0 ) {
  */
 
 function pwuf_get_followers( $user_id = 0 ) {
+  if ( empty( $user_id ) ) {
+      $user_id = get_current_user_id();
+    }
 
+    $followers = get_user_meta( $user_id, '_pwuf_followers', true );
+    
+    return (array) apply_filters( 'pwuf_get_followers', $followers, $user_id );
 }
 
 
