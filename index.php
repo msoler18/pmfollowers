@@ -38,3 +38,57 @@
   }
    
   register_activation_hook(__FILE__, 'wp_authors_tbl_create');
+
+
+
+  add_shortcode("contributors", "contributors");
+   
+  function contributors() {
+   $authors = get_users();
+    
+       $authorsList = '<div id="wp_authors_list">';
+       foreach ($authors as $author) {
+           if (user_can($author->ID, 'publish_posts')) {
+               $authorsList .= '<div class="auth_row">
+                       <div class="auth_image">' . get_avatar($author->ID) . '</div>
+                       <div class="auth_info">
+                           <p class="title">' . get_the_author_meta('display_name', $author->ID) . '</p>
+                           <p class="desc">' . get_the_author_meta('description', $author->ID) . '</p>
+                       </div>
+                       <div class="auth_follow"><input type="button" class="follow" value="Follow"
+                       data-author="' . $author->ID . '" /></div>
+                       <div class="frm_cls"></div>
+                   </div>';
+           }
+       }
+    
+       $authorsList .= '</div>';
+  }
+   
+
+  add_shortcode("form", "form");  
+  function form() { 
+    $output = '<div id="wp_authors_panel">
+        <div id="wp_authors_head">Follow WP Authors</div>
+        <div id="wp_authors_form">
+            <div class="frm_row">
+                <div id="frm_msg" class="' . $actClass . '">' . $actStatus . '</div>
+                <div class="frm_label">Enter Your Email</div>
+                <div class="frm_field"><input type="text" name="user_email" id="user_email"
+    value="' . $confirmedEmail . '" /></div>
+                <div class="frm_cls"></div>
+            </div>
+            <div class="frm_row">
+                <div class="frm_label">&nbsp;</div>
+                <div class="frm_control"><input type="button" value="Subscribe" id="subscribeAuthors" /></div>
+                <div class="frm_control"><input type="button" value="Load" id="loadFollowers" /></div>
+                <div class="frm_cls"></div>
+            </div>
+        </div>
+        ' . $authorsList . '
+    </div>';
+     
+    echo $output;
+  }
+
+  
