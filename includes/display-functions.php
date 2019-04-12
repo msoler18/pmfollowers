@@ -23,15 +23,17 @@ function pwuf_get_follow_unfollow_links( $follow_id = null ) {
 
 	ob_start(); ?>
 	<div class="follow-links">
-		<?php if ( pwuf_is_following( $user_ID, $follow_id ) ) { ?>
-			<a href="#" class="unfollow followed" data-user-id="<?php echo $user_ID; ?>" data-follow-id="<?php echo $follow_id; ?>">unfollow</a>
-			<a href="#" class="follow" style="display:none;" data-user-id="<?php echo $user_ID; ?>" data-follow-id="<?php echo $follow_id; ?>">follow</a>
-		<?php } else { ?>
-			<a href="#" class="follow" data-user-id="<?php echo $user_ID; ?>" data-follow-id="<?php echo $follow_id; ?>">follow</a>
-			<a href="#" class="followed unfollow" style="display:none;" data-user-id="<?php echo $user_ID; ?>" data-follow-id="<?php echo $follow_id; ?>">unfollow</a>
-		<?php } ?>
+		<?php
+		$following = pwuf_get_following( $user_ID );
+		if ( is_array( $following ) && in_array( $follow_id, $following ) ) {?>
+		  <a href="#" class="unfollow followed" data-user-id="<?php echo $user_ID; ?>" data-follow-id="<?php echo $follow_id; ?>">arrête de suivre</a>		
+		<?php } else {?>
+		  <a href="#" class="follow" data-user-id="<?php echo $user_ID; ?>" data-follow-id="<?php echo $follow_id; ?>">Suivre ce membre</a>	
+		<?php } ?>	
+
 		<img src="<?php echo PWUF_FOLLOW_URL; ?>/images/loading.gif" class="pwuf-ajax" style="display:none;"/>
 	</div>
 	<?php
 	return ob_get_clean();
 }
+

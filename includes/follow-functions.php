@@ -196,7 +196,7 @@ function pwuf_get_following_count( $user_id ) {
     $count = 0;
 
     if ( $following ) {
-      $count = count( $following );
+      $count = count( $following ) - 1;
     }
 
     return (int) apply_filters( 'pwuf_get_following_count', $count, $user_id );

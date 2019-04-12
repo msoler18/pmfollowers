@@ -24,6 +24,7 @@ jQuery(document).ready(function($) {
 		$.post( pwuf_vars.ajaxurl, data, function(response) {
 			if( response == 'success' ) {
 				$('.follow-links a').toggle();
+				$('.follow-links a.follow').css('display','none');
 			} else {
 				alert( pwuf_vars.processing_error );
 			}
